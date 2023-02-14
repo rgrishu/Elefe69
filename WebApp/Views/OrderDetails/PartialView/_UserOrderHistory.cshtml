@@ -1,0 +1,137 @@
+﻿@using AppUtility.Extensions
+@using Entities.Enums;
+@using Entities.Models;
+@model IEnumerable<OrderDetailsColumn>
+
+@if (Model.Any())
+{
+    int counter = 0;
+    foreach (var item in Model)
+    {
+        int deliveredDays = (int)DateTime.Now.Date.Subtract(item.ReturnTillOn.Date).TotalDays;
+        string badge = "";
+        badge = item.StatusID == StatusType.OrderPlaced ? "badge-warning" : item.StatusID == StatusType.Cancel ? "badge-danger" : item.StatusID == StatusType.Confirmed ? "badge-success" : item.StatusID == StatusType.Delivered ? "badge-info" : "badge-dark";
+        counter++;
+        <tr>
+            <td>
+                <a href="/productdetails/@item.VarriantID">
+                    <img src="@item.Thumbnail" alt="product" class="img-fluid" onerror="this.onerror=null;this.src='/image/static/no-image.png'">
+                </a>
+            </td>
+            <td>
+                <a href="/UserOrderDetails/?OrderId=@item.ID">order no: <span class="dark-data">@item.OrderID.ToString().ToUpper()</span> <br>@item.Title</a>
+                <div class="mobile-cart-content row">
+                    <div class="col-xs-3">
+                        <div class="qty-box">
+                            <div class="input-group">
+                                <input type="text" name="quantity" class="form-control input-number" value="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-3">
+                        <h4 class="td-color">@item.Rate</h4>
+                    </div>
+                    <div class="col-xs-3">
+                        <h2 class="td-color"><a href="javascript:void(0)" class="icon"><i class="ti-close"></i></a></h2>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <h4>@item.Rate</h4>
+            </td>
+            <td>
+                <span>@item.Attributes</span>
+                <br>
+                <span>Quntity:@item.Qty</span>
+            </td>
+            <td>
+                <div class="responsive-data">
+                    <h4 class="price">@item.Rate</h4>
+                    <span>@item.Attributes</span>|<span>Quntity:@item.Qty</span>
+                </div>
+                <span class="dark-data">
+                    @item.StatusID.ToString()
+
+                    @if (item.StatusID == StatusType.Shipped)
+                    {
+                        <a href="https://shiprocket.co/tracking/@item.DocketNo" target="_blank" class="btn btn-sm btn-info">Track</a>
+                        <span class="btn btn-sm btn-rounded" title="@item.DocketNo"> <i class="fa fa-solid fa-info"></i> </span>
+                        <button class="btn btn-sm btn-rounded" onclick="ShareTrackingDetails('@item.DocketNo','https://shiprocket.co/tracking/@item.DocketNo')">Share</button>
+                    }
+                    @if (item.StatusID == StatusType.Confirmed || item.StatusID == StatusType.Delivered)
+                    {
+                        <a class="badge badge-info" href="/OrderDetails/Invoice?OrderId=@item.ID" target="_blank" title="Download Invoice"><i class="fa fa-arrow-circle-down" aria-hidden="true"></i></a>
+                    }
+
+                </span>
+            </td>
+            <td>
+                <div class="d-flex justify-content-center">
+                    @if (item.StatusID.In(StatusType.OrderPlaced, StatusType.Confirmed, StatusType.Shipped))
+                    {
+                        <a href="#" onclick="CancelUser('@item.ID','@StatusType.CancelRequest')" class="btn btn-sm btn-info btnCancelOrder">Cancel</a>
+                    }
+                    @* @if (item.StatusID != StatusType.Delivered && item.StatusID != StatusType.Cancel && item.StatusID != StatusType.ReturnInitiated && item.StatusID != StatusType.ReturnCompleted && item.StatusID != StatusType.ReturnConfirmred && item.StatusID != StatusType.OrderReplaceInitiated && item.StatusID != StatusType.ReplacementAccepted && item.StatusID != StatusType.OrderReplaced && item.StatusID != StatusType.ReplaceRejected)
+                        {
+                        <a href="#" onclick="CancelUser('@item.ID','@StatusType.CancelRequest')" class="btn btn-sm btn-info btnCancelOrder">Cancel</a>
+                        }*@
+                    @if (item.StatusID == StatusType.Delivered && deliveredDays <= 10)
+                    {
+                        <a href="#" onclick="ReturnItem('@item.ID')" class="btn btn-sm btn-danger btnCancelOrder" style="color:white">Return</a>
+                    }
+                    @if (item.StatusID == StatusType.Delivered && deliveredDays <= 10)
+                    {
+                        <a href="#" onclick="ReplaceItem('@item.ID','@StatusType.OrderReplaceInitiated')" class="btn btn-sm btn-info btnCancelOrder mrl">Replace</a>
+                    }
+                </div>
+            </td>
+        </tr>
+    }
+}
+<script>
+    var CancelUser = (ID, StatusID) => Q.confirm("Are You Sure. You Want To Cancel This Order", () => ChangeStatusItemWithRemark(ID, StatusID));
+    var ReturnItem = (ID) => Q.confirm("Are You Sure. You Want To Return This Order", () => ReturnOrder(ID));
+    var ReplaceItem = (ID, StatusID) => Q.confirm("Are You Sure. You Want To Replace This Order", () => ChangeStatusItemWithRemark(ID, StatusID));
+    var ChangeStatusItemWithRemark = function (ID, StatusID) {
+        let btntxt = StatusID == 'InitiateReturn' ? "Procced Your Return" : "Procced Your Cancellation";
+        const html = `<div class="form-group">
+            <label for="inputAddress">Reason</label>
+            <textarea  id="txtRemark" class="form-control" rows="2"></textarea>
+            </div>
+            <button type="submit"  data-id="${ID}" data-status="${StatusID}" class="btn btn-outline-primary addQuantity " id="btnSubmitRemark">${btntxt}</button>
+            `;
+        Q.alert({
+            title: 'Add Reason',
+            body: html,
+            width: 500
+        });
+    };
+    var ReturnOrder = (ID) => {
+        $.post('/OrderDetails/ReturnOrder', { ID }).done((result) => {
+            Q.alert({
+                title: 'Return Order',
+                body: result,
+                width: 900
+            });
+        })
+    }
+    $(document).on('click', '#btnSubmitRemark', (e) => {
+        const Remark = $('#txtRemark').val();
+        const ID = $(e.currentTarget).data()?.id ?? 0;
+        const StatusID = $(e.currentTarget).data()?.status ?? 0;
+        const currentQty = $('#txtaddDelete').val();
+        if (Remark == '') {
+            Q.notify(-1, 'Reason Required.!');
+            $('#txtRemark').focus();
+            return;
+        }
+        $.post('/OrderDetails/ChangeStatus', { ID, StatusID, Remark }).done((result) => {
+            console.log('result :', result);
+            Q.notify(result.statusCode, result.responseText);
+            if (result.statusCode) {
+                loadData();
+                $('.ui-dialog-titlebar-close').click();
+            }
+        });
+    });
+</script>

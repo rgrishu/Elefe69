@@ -1,0 +1,96 @@
+﻿@using Entities.Models
+@using Service.Models
+@using Entities.Enums;
+@model Response<CartItemsTotalVM>
+@{
+    Layout = null;
+    decimal TotalPrice = 0;
+}
+<a href="javascript:void(0)" class="overlay" onclick="closeCart()"></a>
+<div class="cart-inner">
+    <div class="cart_top">
+        <h3>my cart</h3>
+        <div class="close-cart">
+            <a href="javascript:void(0)" onclick="closeCart()">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+    <div class="cart_media">
+        <ul class="cart_product">
+            @if (Model.StatusCode == ResponseStatus.Success && Model.Result.CartItemSlides.Any())
+            {
+                @foreach (var item in Model.Result.CartItemSlides)
+                {
+                  
+                    <li>
+                         <a href="javascript:void(0)" class="icon delete-cart-slide" data-variant-id="@item.VariantID"><i class="ti-close"  title="Remove Cart"></i></a>
+                        <div class="media">
+                            <a href="/productdetails/@item.VariantID" target="_blank">
+                                <img alt="megastore1" class="me-3" src="@item.ImagePath" onerror="this.onerror=null;this.src='/assets/images/noimage.jpg'">
+                            </a>
+                            <div class="media-body">
+                                <a href="/productdetails/@item.VariantID" target="_blank">
+                                    <h4>@item.Title <small>(@item.Attributes)</small></h4>
+                                </a>
+                                <h6>@item.SellingCost <span>@item.MRP</span></h6>
+                                <hr>
+                                <h6>@(item.SellingCost*item.Qty)</h6>
+                                <div class="addit-box">
+                                    <div class="qty-box">
+                                        <div class="input-group">
+                                            <button class="qty-minus qty-minus-cart"  data-variant-id="@item.VariantID"></button>
+                                            <input class="qty-adj form-control" min="0"  disabled type="number" value="@item.Qty" />
+                                            <button class="qty-plus addtocart" data-variant-id="@item.VariantID"></button>
+                                        </div>
+                                    </div>
+                                    <div class="pro-add">
+                                        <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#edit-product">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        <a href="javascript:void(0)">
+                                            <i data-feather="trash-2"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    TotalPrice = TotalPrice + (item.SellingCost * item.Qty);
+                }
+            }
+            else
+            {
+                <li>
+                    <img src="~/Image/emptyEishList.png">
+                </li>
+            }
+        </ul>
+        @if (Model.StatusCode == ResponseStatus.Success && Model.Result.CartItemSlides.Any())
+        {
+            <ul class="cart_total">
+                <li>
+                    subtotal : <span>@TotalPrice</span>
+                </li>
+                <li>
+                    shpping <span>free</span>
+                </li>
+                <li>
+                    taxes <span><i class="fa fa-inr"></i> 0.00</span>
+                </li>
+                <li>
+                    <div class="total">
+                        total<span>@TotalPrice</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="buttons">
+                        <a href="/CartDetails" class="btn btn-solid btn-sm">view cart</a>
+                        <a href="/checkout/false" class="btn btn-solid btn-sm ">checkout</a>
+                    </div>
+                </li>
+            </ul>
+        }
+    </div>
+</div>
+

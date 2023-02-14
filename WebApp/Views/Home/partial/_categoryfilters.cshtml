@@ -1,0 +1,57 @@
+﻿@using Entities.Models
+@using Service.Models
+@using Entities.Enums;
+@model Response<IEnumerable<Filters>>
+@{
+    var result = Model != null && Model.StatusCode == ResponseStatus.Success && Model.Result.Any() ? Model.Result : new List<Filters>();
+    int i = 1;
+    int count = 0;
+}
+
+@foreach (var item in result)
+{
+    string cls = count == 0 ? "open" : "mt-3";
+    string styl = count == 0 ? "" : count == 1 ? "" : "display: none;";
+    count++;
+    <div class="collection-collapse-block @cls">
+        <h3 class="collapse-block-title mt-0">@item.Name</h3>
+        <div class="collection-collapse-block-content" style="@styl">
+            <div class="collection-brand-filter">
+                @foreach (var attr in @item.attributes)
+                {
+                    <div class="custom-control custom-checkbox  form-check collection-filter-checkbox">
+                        <input type="checkbox" class="custom-control-input form-check-input" value="@attr.AttributeValue" id="@i">
+                        <label class="custom-control-label form-check-label" for="@attr.AttributeValue">@attr.AttributeValue</label>
+                    </div>
+                    i = i + 1;
+                }
+            </div>
+        </div>
+    </div>
+
+}
+<script>
+    $('.collection-collapse-block .form-check-input').change(function () {
+        let val = [];
+        $(':checkbox:checked').each(function (i) {
+            val[i] = $(this).val();
+        });
+        let filt = val.join(',');
+        loadProductsByCategory(filt);
+    });
+
+    $('.collapse-block-title').on('click', function (e) {
+        e.preventDefault;
+        var speed = 300;
+        var thisItem = $(this).parent(),
+            nextLevel = $(this).next('.collection-collapse-block-content');
+        if (thisItem.hasClass('open')) {
+            thisItem.removeClass('open');
+            nextLevel.slideUp(speed);
+        }
+        else {
+            thisItem.addClass('open');
+            nextLevel.slideDown(speed);
+        }
+    });
+</script>

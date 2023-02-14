@@ -1,0 +1,80 @@
+﻿@using Entities.Enums;
+<style>
+    .error {
+        color: crimson;
+    }
+</style>
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-9">
+                <h2>
+                    Return Request
+                </h2>
+            </div>
+            <div class="col-sm-3 float-end">
+                   
+                <div class="input-group">
+                     <select class="form-control" id="status" onchange="loadData()">
+                        <option value="0">Select Status</option>
+                        <option value="@StatusType.ReturnInitiated">@StatusType.ReturnInitiated.ToString()</option>
+                        <option value="@StatusType.ReturnCompleted">@StatusType.ReturnCompleted.ToString()</option>
+                        <option value="@StatusType.ReturnReceived">@StatusType.ReturnReceived.ToString()</option>
+                    </select>
+                    <div class="input-group-append" style="cursor:pointer">
+                        <span class="input-group-text btn-success" title="Download Excel" onclick="downloadExcel()" id="basic-addon1"><i class=" fa fa-sharp fa-solid fa-file-excel" style="font-size: 22px;"></i></span>
+                    </div>
+                </div>
+                </div>
+            <div class="col-md-12 mt-2 table-responsive">
+                <table class="table table-bordered" id="Grid">
+                    <thead>
+                        <tr role="row">
+                            <th>#</th>
+                            <th>Product</th>
+                            <th class="text-nowrap">Product Name</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>MRP</th>
+                            <th>Mode</th>
+                            <th class="text-nowrap">Order Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        $(() => {
+            loadData();
+        })
+        var loadData = () => {
+            let param = {
+                StatusID: $('#status').val()
+            }
+            $.post('/OrderDetails/ReturnRequestList', param).done(function (result) {
+                $('#Grid tbody').html(result);
+            }).fail(xhr => Q.notify(-1, xhrText[xhr.status]));
+        };
+        var ChangeStatusItem = function (ID, StatusID) {
+            $.post('/OrderDetails/ChangeStatus', { ID, StatusID }).done((result) => {
+                console.log('result :', result);
+                Q.notify(result.statusCode, result.responseText);
+                if (result.statusCode)
+                    loadData();
+            })
+        };
+        var downloadExcel = () => {
+            let param = {
+                StatusID: $('#status').val()
+            }
+            window.location = '/OrderDetails/ReturnOrderReportExcel?' + $.param(param);
+        }
+    </script>
+}

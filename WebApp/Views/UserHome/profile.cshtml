@@ -1,0 +1,355 @@
+﻿@using Entities.Enums;
+@model Role
+@{
+    if (Model == Role.Admin || Model == Role.Vendor)
+        Layout = "_AdminLayout";
+    else
+        Layout = "_Layout";
+}
+<style>
+    /**************For Profile********************/
+    .emp-profile {
+        padding: 2%;
+        margin-top: 2%;
+        margin-bottom: 2%;
+        border-radius: 0.5rem;
+        background: #fff;
+    }
+
+    @@media (min-width:200px) and (max-width:1024px) {
+        .profile-head {
+            margin-top: 20px;
+        }
+    }
+
+    .profile-img {
+        text-align: center;
+    }
+
+        .profile-img img {
+            /*width: 70%;
+                                height: 100%;*/
+        }
+
+        .profile-img .file {
+            position: relative;
+            overflow: hidden;
+            margin-top: -20%;
+            width: 70%;
+            border: none;
+            border-radius: 0;
+            font-size: 15px;
+            background: #212529b8;
+        }
+
+            .profile-img .file input {
+                position: absolute;
+                opacity: 0;
+                right: 0;
+                top: 0;
+            }
+
+    .profile-head h5 {
+        color: #333;
+    }
+
+    .profile-head h6 {
+        color: #0062cc;
+    }
+
+    .profile-edit-btn {
+        border: none;
+        border-radius: 1.5rem;
+        width: 70%;
+        padding: 2%;
+        font-weight: 600;
+        color: #6c757d;
+        cursor: pointer;
+    }
+
+    .proile-rating {
+        font-size: 12px;
+        color: #818182;
+        margin-top: 5%;
+    }
+
+        .proile-rating span {
+            color: #495057;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+    .profile-head .nav-tabs {
+        margin-bottom: 5%;
+    }
+
+        .profile-head .nav-tabs .nav-link {
+            font-weight: 600;
+            border: none;
+        }
+
+            .profile-head .nav-tabs .nav-link.active {
+                border: none;
+                border-bottom: 2px solid #0062cc;
+            }
+
+    .profile-work {
+        padding: 14%;
+        margin-top: -15%;
+    }
+
+        .profile-work p {
+            font-size: 12px;
+            color: #818182;
+            font-weight: 600;
+            margin-top: 10%;
+        }
+
+        .profile-work a {
+            text-decoration: none;
+            color: #495057;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-work ul {
+            list-style: none;
+        }
+
+    .profile-tab label {
+        font-weight: 600;
+    }
+
+    .profile-tab p {
+        font-weight: 600;
+        color: #0062cc;
+    }
+
+    .box {
+        background-color: #fff;
+        border-radius: 8px;
+        border: 2px solid #e9ebef;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    .box-title {
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        font-size: 16px;
+        font-weight: 700;
+        color: #094bde;
+        letter-spacing: 2px;
+    }
+
+    .plan-selection {
+        border-bottom: 2px solid #e9ebef;
+        padding-bottom: 25px;
+        margin-bottom: 35px;
+    }
+
+        .plan-selection:last-child {
+            border-bottom: 0px;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
+        }
+
+    .plan-data {
+        position: relative;
+    }
+
+        .plan-data label {
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+    .plan-price {
+        position: absolute;
+        right: 0px;
+        color: #094bde;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -1px;
+        line-height: 1.5;
+        bottom: 43px;
+    }
+
+    .widget {
+        background-color: #fff;
+        border-radius: 8px;
+        border: 2px solid #e9ebef;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    .widget-title {
+        color: #094bde;
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 25px;
+        letter-spacing: 1px;
+        display: table;
+        line-height: 1;
+    }
+
+    .summary-content {
+        padding: 15px 0px;
+    }
+
+    .summary-price {
+        color: #094bde;
+        font-size: 20px;
+        font-weight: 400;
+        letter-spacing: -1px;
+        margin-bottom: 0px;
+        display: inline-block;
+        float: right;
+    }
+
+    .summary-small-text {
+        font-weight: 700;
+        font-size: 12px;
+        color: #8f929a;
+    }
+
+    .summary-title {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1c1e22;
+    }
+
+    .summary-head {
+        display: inline-block;
+        /*width: 120px;*/
+    }
+
+    .summary-content img {
+        width: 70px;
+        margin-right: 10px;
+    }
+</style>
+
+@if (Model == Role.Admin || Model == Role.Vendor)
+{
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            Profile
+        </h1>
+    </div>
+}
+<div class="content">
+    <div class="container emp-profile">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="profile-img">
+                    <img src="/assets/images/user-pic.png" alt="" class="img-fluid w-50" />
+                    <div class="file btn btn-lg btn-primary">
+                        Change Photo
+                        <input type="file" name="file" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div cite="row">
+                    <div class="col-md-12">
+                        <div class="profile-head">
+                            <h5 id="UserName">
+                            </h5>
+
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#Personal" role="tab" aria-controls="home" aria-selected="true">Personal Information</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link OrderList" id="profile-tab" data-toggle="tab" href="#Payments" role="tab" aria-controls="profile" aria-selected="false">Order History</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link Addressess" id="profile-tab" data-toggle="tab" href="#Addresses" role="tab" aria-controls="profile" aria-selected="false">Manage Addresses</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="tab-content profile-tab" id="myTabContent">
+                            <div class="tab-pane fade show active" id="Personal" role="tabpanel" aria-labelledby="Personal-tab">
+                            </div>
+
+                            <div class="tab-pane fade" id="Payments" role="tabpanel" aria-labelledby="Payments-tab">
+                            </div>
+
+                            <div class="tab-pane fade" id="Addresses" role="tabpanel" aria-labelledby="Addresses-tab">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        $(() => {
+            loadData();
+        })
+        var loadData = () => {
+            $.post('/User/ProfileDetails').done((result) => {
+                $('#Personal').html(result);
+            })
+        }
+        $(document).on('click', '#EditDetails', () => {
+            $.post('/User/EditProfile').done((result) => {
+                $('#Personal').html(result);
+            })
+        });
+        $(document).on('click', '.OrderList', () => {
+            $.post('/User/OrderList').done((result) => {
+                $('#Payments').html(result);
+            })
+        });
+        $(document).on('click', '.Addressess', () => {
+            loadAddress();
+        });
+        var loadAddress = () => {
+            $.post('/User/UserAddress').done((result) => {
+                $('#Addresses').html(result);
+            })
+        }
+        var EditAddress = (Id) => {
+            $.post('/User/EditAddress', { Id }).done((result) => {
+                $('#Addresses').html(result);
+            })
+        }
+        $(document).on('click', '#btnSubmitAdd', () => {
+            let param = {
+                Id: $('input[name="Id"]').val(),
+                FullName: $('input[name="FullName"]').val(),
+                MobileNo: $('input[name="MobileNo"]').val(),
+                HouseNo: $('input[name="HouseNo"]').val(),
+                Area: $('input[name="Area"]').val(),
+                Landmark: $('input[name="Landmark"]').val(),
+                TownCity: $('input[name="TownCity"]').val(),
+                Pincode: $('input[name="Pincode"]').val(),
+                StateID: $('#StateID').val(),
+                AddressTypeID: $('#AddressTypeID').val()
+            };
+            $('.clr').text('');
+            $.post('/SaveAddress', param).done((result) => {
+                Q.notify(result.statusCode, result.responseText);
+                if (result.statusCode) {
+                    loadAddress();
+                }
+                $.each(result, (k, v) => {
+                    if (v.validationState == '1') {
+                        $(`.${k}`).text(`${v.errors[0].errorMessage}`);
+                        console.log(v.errors[0].errorMessage);
+                    }
+                })
+            })
+        })
+    </script>
+
+}

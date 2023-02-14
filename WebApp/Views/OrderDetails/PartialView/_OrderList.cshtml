@@ -1,0 +1,214 @@
+﻿@using Entities.Enums;
+@using Entities.Models;
+@model IEnumerable<OrderDetailsColumn>
+
+@if (Model.Any())
+{
+    int counter = 0;
+    foreach (var item in Model)
+    {
+        string badge = "";
+        badge = item.StatusID == StatusType.OrderPlaced ? "badge-warning" : item.StatusID == StatusType.Cancel ? "badge-danger" : item.StatusID == StatusType.Confirmed ? "badge-success" : item.StatusID == StatusType.Delivered ? "badge-info" : "badge-dark";
+        counter++;
+        <tr>
+            <td>@counter</td>
+            <td class="align-middle">
+                <div class="btn-group dropup">
+                    <a href="#" id="act_@counter" class="btn btn-outline-dark btn-block dropdown-toggle" role="button" data-toggle="dropdown"
+               aria-haspopup="true" aria-expaned="false"></a>
+                    <div class="dropdown-menu" aria-labelledby="act">
+                        <h6 class="dropdown-header">Action Menu</h6>
+                        @if (item.StatusID == StatusType.OrderPlaced)
+                        {
+                            <a href="#" onclick="Cancel('@item.ID','@StatusType.Cancel')" class="dropdown-item Edit">Cancel</a>
+                            <a href="#" onclick="Confirm('@item.ID','@StatusType.Confirmed')" class="dropdown-item Edit">Confirm</a>
+                        }
+                        @if (item.StatusID == StatusType.Shipped)
+                        {
+                            <a href="#" onclick="MarkasDilivered('@item.ID','@StatusType.Delivered','')" class="dropdown-item Edit">Mark Deliver</a>
+                        }
+                        @if (item.StatusID == StatusType.Confirmed)
+                        {
+                            <a href="#" onclick="MarkasShipped('@item.ID')" class="dropdown-item Edit">Mark as Shipped</a>
+                        }
+                        @if (item.StatusID == StatusType.ReturnInitiated)
+                        {
+                            <a href="#" onclick="IsReturnCancelConform('@item.ID','@StatusType.ReturnCanceled')" class="dropdown-item Edit">Return Cancel</a>
+                            <a href="#" onclick="IsReturnCancelConform('@item.ID','@StatusType.ReturnConfirmred')" class="dropdown-item Edit">Return Conform</a>
+                        }
+                        @if (item.StatusID == StatusType.OrderReplaceInitiated)
+                        {
+                            <a href="#" onclick="IsReplaceCancelConform('@item.ID','@StatusType.ReplaceRejected')" class="dropdown-item Edit">Replace Cancel</a>
+                            <a href="#" onclick="IsReplaceCancelConform('@item.ID','@StatusType.ReplacementAccepted')" class="dropdown-item Edit">Replace Conform</a>
+                        }
+                        @if (item.StatusID == StatusType.ReplacementAccepted)
+                        {
+                            <a href="#" onclick="OrderReplaced('@item.ID','@StatusType.OrderReplaced')" class="dropdown-item Edit">Order Replaced</a>
+                        }
+                        @if (item.StatusID == StatusType.CancelRequest || item.StatusID == StatusType.CancelRequestRejected)
+                        {
+                            <a href="#" onclick="IsCancelConfAndRej('@item.ID','@StatusType.Cancel')" class="dropdown-item Edit">Order Cancel Approved</a>
+                            @if (item.StatusID != StatusType.CancelRequestRejected)
+                            {
+                                <a href="#" onclick="IsCancelConfAndRej('@item.ID','@StatusType.CancelRequestRejected')" class="dropdown-item Edit">Order Cancel Reject</a>
+                            }
+                        }
+                        @if (item.StatusID != StatusType.Cancel && item.StatusID != StatusType.OrderPlaced)
+                        {
+                            <a href="/OrderDetails/Invoice?OrderId=@item.ID" class="dropdown-item Edit" target="_blank" title="Download Invoice">Download Invoice</a>
+                        }
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="card">
+                    <div class="valign-wrapper pr12ImgNameDiv">
+                        <img src="@item.Thumbnail" class="img-fluid rounded-circle" style="width:50px" onerror="this.onerror=null;this.src='/image/static/no-image.png'">
+                    </div>
+                </div>
+            </td>
+            <td>@item.Product</td>
+            <td>@item.Title</td>
+            <td>
+                @if (item.StatusID == StatusType.ReturnInitiated || item.StatusID == StatusType.ReturnCompleted || item.StatusID == StatusType.ReturnReceived || item.StatusID == StatusType.ReturnConfirmred)
+                {
+                    <label class="w-100">
+                        <span class="fa fa-info-circle text-info" style="cursor:pointer" onclick="ShowReason('@item.ID')" aria-hidden="true" title="View Reason"></span>
+                        <span class="badge @badge">@item.StatusID.ToString()</span>
+                    </label>
+                }
+                else
+                {
+                    <span class="badge @badge">@item.StatusID.ToString()</span>
+                }
+
+            </td>
+            <td>@item.Qty</td>
+            <td>@item.Attributes</td>
+            <td>@item.Rate</td>
+            <td>@item.MRP</td>
+            <td>@item.IGST</td>
+            <td>@item.CGST</td>
+            <td>@item.SGST</td>
+            <td>@item.PaymentMode</td>
+            <td>@item.EntryOn</td>
+            <td>@item.ShopName</td>
+        </tr>
+    }
+}
+<script>
+    var MarkasShipped = (Id) => {
+        $.get('/OrderDetails/MarkAsShippV', { Id }).done((result) => {
+            Q.alert({
+                title: 'Shipping Details',
+                body: result,
+                width: 600
+            });
+        })
+    }
+    var MarkasDilivered = (Id, StatusID, Remark = '') => {
+        $.post('/OrderDetails/ChangeStatus', { ID: Id, StatusID: StatusID, Remark: Remark }).done((result) => {
+            Q.notify(result.statusCode, result.statusCode == 1 ? 'Success' : result.responseText);
+            if (result.statusCode) {
+                loadData();
+            }
+        });
+    }
+    var IsReturnCancelConform = (Id, StatusID) => {
+        if (StatusID == 'ReturnCanceled') {
+            let btntxt = StatusID == 'ReturnCanceled' ? "Procced Cancel Request" : "Procced Replacement Accepted";
+            const html = `<div class="form-group">
+                     <label for="inputAddress">Reason</label>
+                     <textarea  id="txtRemark" class="form-control" rows="2"></textarea>
+                     </div>
+                     <button type="submit"  data-id="${Id}" data-status="${StatusID}" class="btn btn-outline-primary addQuantity " id="btnSubmitRemark">${btntxt}</button>
+                     `;
+            Q.alert({
+                title: 'Add Reason',
+                body: html,
+                width: 500
+            });
+            $('#btnSubmitRemark').click(function () {
+                let remark = $('#txtRemark').val();
+                $.post('/OrderDetails/ChangeStatus', { ID: Id, StatusID: StatusID, Remark: remark }).done(function (result) {
+                    Q.notify(result.statusCode, result.responseText);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 5000);
+                }).fail(function (xhr) {
+                    console.log(xhr.responseText);
+                    Q.notify(-1, 'something went wrong.');
+                });
+            });
+        }
+        else {
+            $.post('/OrderDetails/OrderReplacedConform', { ID: Id, StatusID: StatusID }).done(function (result) {
+                Q.notify(result.statusCode, result.responseText);
+                window.location.reload();
+            }).fail(function (xhr) {
+                console.log(xhr.responseText);
+                Q.notify(-1, 'something went wrong.');
+            });
+        }
+    }
+    var IsCancelConfAndRej = (Id, StatusId) => {
+        let obj = {
+            ID: Id,
+            StatusID: StatusId
+        }
+        $.post('/OrderDetails/ChangeStatus', obj).done(function (result) {
+            Q.notify(result.statusCode, result.responseText);
+        }).fail(function (xhr) {
+            console.log(xhr.responseText);
+            Q.notify(-1, 'something went wrong.');
+        });
+    }
+    var IsReplaceCancelConform = (Id, StatusID) => {
+        if (StatusID == 'ReplaceRejected') {
+            let btntxt = StatusID == 'ReplaceRejected' ? "Procced Cancel Replacement" : "Procced Replacement Accepted";
+            const html = `<div class="form-group">
+                                                                                   <label for="inputAddress">Reason</label>
+                                                                                   <textarea  id="txtRemark" class="form-control" rows="2"></textarea>
+                                                                                   </div>
+                                                                                   <button type="submit"  data-id="${Id}" data-status="${StatusID}" class="btn btn-outline-primary addQuantity " id="btnSubmitRemark">${btntxt}</button>
+                                                                                   `;
+            Q.alert({
+                title: 'Add Reason',
+                body: html,
+                width: 500
+            });
+            $('#btnSubmitRemark').click(function () {
+                let remark = $('#txtRemark').val();
+                $.post('/OrderDetails/ChangeStatus', { ID: Id, StatusID: StatusID, Remark: remark }).done(function (result) {
+                    Q.notify(result.statusCode, result.responseText);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 5000);
+                }).fail(function (xhr) {
+                    console.log(xhr.responseText);
+                    Q.notify(-1, 'something went wrong.');
+                });
+            });
+        }
+        else {
+            $.post('/OrderDetails/ChangeStatus', { ID: Id, StatusID: StatusID }).done(function (result) {
+                Q.notify(result.statusCode, result.responseText);
+                window.location.reload();
+            }).fail(function (xhr) {
+                console.log(xhr.responseText);
+                Q.notify(-1, 'something went wrong.');
+            });
+        }
+    }
+    var OrderReplaced = (Id, StatusID) => {
+        $.post('/OrderDetails/OrderReplacedConform', { ID: Id, StatusID: StatusID }).done(function (result) {
+            Q.notify(result.statusCode, result.responseText);
+            setTimeout(function () {
+                window.location.reload();
+            }, 5000);
+        }).fail(function (xhr) {
+            console.log(xhr.responseText);
+            Q.notify(-1, 'something went wrong.');
+        });
+    }
+</script>

@@ -1,0 +1,178 @@
+﻿@using Entities.Enums
+@using WebApp.Models.ViewModels;
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+<style>
+    #togglePassword {
+        float: right;
+        margin-top: -38px;
+        position: relative;
+        z-index: 2;
+        padding: 2% !important;
+    }
+</style>
+<section class="login-page section-big-py-space b-g-light">
+    <div class="custom-container">
+        <div class="row">
+            <div class="col-lg-6 col-md-8 offset-lg-3">
+                <div class="theme-card">
+                    <h3 class="text-center">Login</h3>
+                    <div class="theme-form">
+                        <div class="tab-product tab-exes creative-card creative-inner m-0">
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-12">
+                                    <ul class="nav nav-tabs nav-material" id="top-tab" role="tablist">
+                                        <li class="nav-item mb-2 w-50">
+                                            <a class="nav-link active" id="top-home-tab" data-bs-toggle="tab" href="#tab-otp" role="tab" aria-selected="true"><i class="icofont icofont-ui-home"></i>Login With OTP</a>
+                                            <div class="material-border"></div>
+                                        </li>
+                                        <li class="nav-item mb-2 w-50">
+                                            <a class="nav-link" id="Login" data-bs-toggle="tab" href="#tab-Login" role="tab" aria-selected="false"><i class="icofont icofont-man-in-glasses"></i>Login</a>
+                                            <div class="material-border"></div>
+                                        </li>
+
+                                    </ul>
+                                    <div class="tab-content nav-material" id="top-tabContent">
+                                        <div class="tab-pane fade show active" id="tab-otp" role="tabpanel" aria-labelledby="top-home-tab">
+
+                                            <form asp-action="LoginWithOTP" asp-route-ReturnUrl="@ViewBag.returnUrl" data-ajax="false">
+
+                                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                                <div class="form-group" id="divemail">
+                                                    <label asp-for="MobileNo" class="sr-only"></label>
+                                                    <input asp-for="MobileNo" id="txtmobile" autocomplete="off" class="form-control" maxlength="10" placeholder="Mobile" />
+                                                    <span asp-validation-for="MobileNo" class="text-danger"></span>
+                                                </div>
+                                                @if (Model.StatusCode == "Success")
+                                                {
+                                                    <div class="form-group mb-4" id="divOTP">
+                                                        <label asp-for="OTP" class="sr-only"></label>
+                                                        <input asp-for="OTP" id="txtotp" autocomplete="off" class="form-control" placeholder="OTP" />
+                                                        <span asp-validation-for="OTP" class="text-danger"></span>
+                                                    </div>
+                                                }
+                                                @if (Model.StatusCode == "Success")
+                                                {
+                                                    <button type="submit" id="btnVerifyOtp" class="btn btn-normal">Verify OTP</button>
+                                                    <button type="submit" id="btnresendsndOTP" class="btn btn-normal2">Re Send OTP</button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit" id="btnsndOTP" class="btn btn-normal">Send OTP</button>
+                                                }
+                                                <a href="#!" class="float-end txt-default mt-2" data-toggle="modal" id="forgotPass">Forgot password?</a>
+                                            </form>
+                                        </div>
+                                        <div class="tab-pane fade" id="tab-Login" role="tabpanel" aria-labelledby="profile-top-tab">
+                                            <form asp-action="Login" asp-route-ReturnUrl="@ViewBag.returnUrl" data-ajax="false">
+
+                                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                                <div class="form-group" id="divemail">
+                                                    <label asp-for="MobileNo" class="sr-only"></label>
+                                                    <input asp-for="MobileNo" id="txtemail" autocomplete="off" class="form-control" placeholder="Enter Mobile Number" />
+                                                    <span asp-validation-for="MobileNo" class="text-danger"></span>
+                                                </div>
+                                                <div class="form-group mb-4">
+                                                    <label asp-for="Password" class="sr-only"></label>
+                                                    <input asp-for="Password" id="txtpassord" class="form-control" placeholder="***********" />
+                                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                                    <i class="fa fa-eye-slash" id="togglePassword"></i>
+                                                </div>
+                                                @if (Model.IsTwoFactorEnabled)
+                                                {
+                                                    <div class="form-group mb-4">
+                                                        <label asp-for="GAuthPin" class="sr-only"></label>
+                                                        <input asp-for="GAuthPin" id="GAuthPin" class="form-control" placeholder="***********" />
+                                                        <span class="text-danger">Enter Google Authentication Pin</span>
+                                                    </div>
+                                                }
+                                                <button type="submit" id="btnsubmit" class="btn btn-normal">Login</button>
+                                                <a href="#!" class="float-end txt-default mt-2" data-toggle="modal" id="forgotPass">Forgot password?</a>
+                                            </form>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="mt-3 mb-3">Sign up for a free account at our store. Registration is quick and easy. It allows you to be able to order from our shop. To start shopping click register.</p>
+                        <a href="~/Account/Register" class="txt-default d-block">Create an Account</a>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- The Modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Password Recovery</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            //$('#btnsubmit').click(function (e) {
+            //    if ($('#txtemail').val() == '') {
+            //        e.preventDefault();
+            //        Q.notify(-1, 'Email Required');
+            //        return false;
+            //    }
+            //    if ($('#txtpassord').val() == '') {
+            //        e.preventDefault();
+            //        Q.notify(-1, 'Password Required');
+            //        return false;
+            //    }
+            //});
+            $('#forgotPass').click(function(e) {
+                $.post('/Account/ForgotPasswordView').done(result => {
+                    $('.modal-body').html(result);
+                    $('#myModal').modal('show');
+                }).fail(xhr => {
+                    console.log(xhr.responseText);
+                });
+            });
+
+            $('#btnVerifyOtp').click(function() {
+                if ($('#txtotp').val() == '') {
+                    Q.notify(-1, 'Otp Required.!');
+                    return false;
+                }
+            });
+        });
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#txtpassord');
+        togglePassword.addEventListener('click', function(e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            if ($(this).hasClass('fa-eye-slash')) {
+                $(this).removeClass('fa-eye-slash');
+                $(this).addClass('fa-eye');
+                $('#password').attr('type', 'text');
+            } else {
+                $(this).removeClass('fa-eye');
+                $(this).addClass('fa-eye-slash');
+            }
+        });
+    </script>
+}

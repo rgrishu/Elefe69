@@ -1,0 +1,57 @@
+﻿@{
+    Layout = "_layout";
+}
+<section class="section-big-py-space ratio_asos b-g-light">
+    <div class="collection-wrapper">
+        <div class="custom-container">
+            <div class="row">
+                <div class="col-sm-3 collection-filter category-side category-page-side">
+                    <!-- side-bar colleps block stat -->
+                    <div class="collection-filter-block creative-card creative-inner category-side">
+                        <!-- brand filter start -->
+                        <div class="collection-mobile-back">
+                            <span class="filter-back"><i class="fa fa-angle-left" aria-hidden="true"></i> back</span>
+                        </div>
+                        <div id="dvfilters">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-9">
+                    <products></products>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+    <script>
+        const getCategoryId = () => {
+            var url = window.location.href;
+            return url.substring(url.lastIndexOf('/') + 1);
+        };
+
+        $(document).ready(function () {
+            loadFilters();
+            loadProductsByCategory();
+        });
+
+        const loadProductsByCategory = function (filters='') {
+            let param = {
+                cid: getCategoryId(),
+                sortBy: $('#sortItem').val(),
+                filters
+            };
+            $.post("/FilteredProductsByCategory",param).done(res => {
+                $('products').html(res);
+            }).fail(xhr => Q.notify(-1, xhr.responseText)).always(() => "");
+        };
+
+        const loadFilters = function () {
+            let cid = getCategoryId();
+            $.post("/Categoryfilters", { cid: cid }).done(res => {
+                $('#dvfilters').html(res);
+            }).fail(xhr => Q.notify(-1, xhr.responseText)).always(() => "");
+        };
+    </script>
+}
